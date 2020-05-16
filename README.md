@@ -1,5 +1,11 @@
 # Mac_and_Ubuntu_trans
-使用nc命令以及ssh完成虚拟机和Mac主机之间信息交换，简单又粗暴的方法
+使用nc命令以及ssh完成虚拟机和Mac主机之间信息交换，简单又粗暴的方法 （主要是为了方便自己复制vim中的内容）
+
+### 需求
+
+Mac和Ubuntu中都要有的shell命令：nc ssh
+
+主机中的软件：（不是必须）Typora
 
 ### 功能
 
