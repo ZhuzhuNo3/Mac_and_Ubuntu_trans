@@ -1,0 +1,2 @@
+# Mac_and_Ubuntu_trans
+使用nc命令以及ssh完成虚拟机和Mac主机之间信息交换，简单又粗暴的方法
