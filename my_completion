@@ -1,0 +1,2 @@
+# /etc/bash_completion.d/
+complete -o filenames -F _longopt -f -X '!*.md' typora

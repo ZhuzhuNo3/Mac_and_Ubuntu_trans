@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Ubuntu中需要有nc命令
+
+# route -n 可查询网关地址
+# gateway=`echo $SSH_CONNECTION |sed "s/ .*//g"`
+gateway=192.168.64.1
+# 主机监听的端口号
+port=2333
+
+# 上面两个也可以直接放到bashrc里
+
+function send_msg()
+{
+    if [ x$1 = x"copy" ];then
+        cat > ~/remote_cp_tmp
+        cat ~/remote_cp_tmp
+        echo -n "copy" |nc -w 0 $gateway $port
+    elif [ x$1 = x"typora" ];then
+        [ $# = 2 ] || exit -1;
+        [ x${2##*.} != x"md" ] && exit -1;                                              
+        [ -f $2 ] || touch $2; 
+        echo -n "`pwd`/$2" > ~/openTypora
+        echo -n "typora" |nc -w 0 $gateway $port
+    elif [ x$1 = x"trans" ];then
+        [ $# = 2 ] || exit -1;
+        [ -f $2 ] || exit -1;
+        echo -n "`pwd`/$2" > ~/transFile
+        echo -n "trans" |nc -w 0 $gateway $port
+    fi
+}
+
+send_msg $*
