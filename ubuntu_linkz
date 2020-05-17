@@ -22,11 +22,16 @@ function send_msg()
         [ -f $2 ] || touch $2; 
         echo -n "`pwd`/$2" > ~/openTypora
         echo -n "typora" |nc -w 0 $gateway $port
-    elif [ x$1 = x"trans" ];then
-        [ $# = 2 ] || exit -1;
-        [ -f $2 ] || exit -1;
-        echo -n "`pwd`/$2" > ~/transFile
-        echo -n "trans" |nc -w 0 $gateway $port
+    # # 还没写完
+    # elif [ x$1 = x"trans" ];then
+    #     [ $# -gt 1 ] || exit -1;
+    #     [ -f $2 ] || exit -1;
+    #     echo -n "`pwd`/$2" > ~/transFile
+    #     echo -n "trans" |nc -w 0 $gateway $port
+    # # 还没写完
+    # elif [ x$1 = x"gets" ];then
+    #     [ $# -gt 1 ] || exit -1;
+
     fi
 }
 
