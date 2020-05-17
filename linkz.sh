@@ -34,29 +34,40 @@ function typora_open()
     rm $now_file $old_file
 }
 
+function paste_remote()
+{
+    ssh $YOURHOST "cat ~/remote_cp_tmp" |pbcopy
+    ssh $YOURHOST "rm -rf ~/remote_cp_tmp"
+}
+
 function listening()
 {
-    while true
-    do
-        # nc 命令很魔幻 少用
-        i=`nc -l $PORT |cat`
-        if [ x"$i" = x"copy" ];then
-            ssh $YOURHOST "cat ~/remote_cp_tmp" |pbcopy
-            ssh $YOURHOST "rm -rf ~/remote_cp_tmp"
-        elif [ x"$i" = x"exit" ] || [ x"$i" = x ];then
-            exit 0
-        elif [ x"$i" = x"trans" ];then
-            filedir=`ssh $YOURHOST "cat ~/transFile"`
-            ssh $YOURHOST "rm -rf ~/transFile"
-            # 下载到默认文件夹
-            scp $YOURHOST:$filedir ~/Downloads
-        elif [ x"$i" = x"typora" ];then
-            md_dir=`ssh $YOURHOST "cat ~/openTypora"`
-            # 长命令放入后台转变成守护进程
-            typora_open $md_dir >/dev/null 2>&1 &
-            disown
-        fi
-    done &
+    # 只需要一个后台就好了
+    echo -n "check" |nc 127.0.0.1 $PORT
+    if [ $? != 0 ];then
+        # 登录计数
+        logcount=1
+        while true
+        do
+            # nc 命令很魔幻 少用
+            i=`nc -l $PORT |cat`
+            if [ x"$i" = x"copy" ];then
+                paste_remote
+            elif [ x"$i" = x"typora" ];then
+                md_dir=`ssh $YOURHOST "cat ~/openTypora"`
+                typora_open $md_dir >/dev/null 2>&1 &
+                disown
+            elif [ x"$i" = x"check" ];then
+                logcount=$(($logcount + 1))
+            elif [ x"$i" = x"exit" ];then
+                logcount=$(($logcount - 1))
+                [ $logcount = 0 ] && exit 0
+            else
+                exit 0
+            fi
+        done &
+        disown
+    fi
 }
 
 # 开启后台进程
