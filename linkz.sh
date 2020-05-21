@@ -43,7 +43,7 @@ function paste_remote()
 function listening()
 {
     # 只需要一个后台就好了
-    echo -n "check" |nc 127.0.0.1 $PORT
+    echo -n "check" |nc 127.0.0.1 $PORT -w 0
     if [ $? != 0 ];then
         # 登录计数
         logcount=1
@@ -51,12 +51,15 @@ function listening()
         do
             # nc 命令很魔幻 少用
             i=`nc -l $PORT |cat`
+            # 从Ubuntu的vim拷贝选中内容到Mac剪贴板
             if [ x"$i" = x"copy" ];then
                 paste_remote
+            # 使用Mac中的Typora打开Ubuntu中的md文档
             elif [ x"$i" = x"typora" ];then
                 md_dir=`ssh $YOURHOST "cat ~/openTypora"`
                 typora_open $md_dir >/dev/null 2>&1 &
                 disown
+            # 
             elif [ x"$i" = x"check" ];then
                 logcount=$(($logcount + 1))
             elif [ x"$i" = x"exit" ];then
@@ -77,4 +80,4 @@ multipass start zz
 # 连接虚拟机
 ssh $YOURHOST
 # 关闭后台进程
-(echo -n "exit"|nc 127.0.0.1 $PORT)
+(echo "exit"|nc 127.0.0.1 $PORT)
