@@ -40,6 +40,17 @@ function paste_remote()
     ssh $YOURHOST "rm -rf ~/remote_cp_tmp"
 }
 
+function get_backup()
+{
+    BACKUPFILE="/backup_`date '+%Y%m%d'`.tar.gz"
+    ssh $YOURHOST "[ -e "$BACKUPFILE" ]"
+    [ $? = 0 ] || BACKUPFILE="/backup_`date -v-1d '+%Y%m%d'`"
+    ssh $YOURHOST "[ -e "$BACKUPFILE" ]"
+    [ $? = 0 ] || exit 1;
+    scp z:$BACKUPFILE ~/Code/Ubuntu_backup/$BACKUPFILE
+    ssh $YOURHOST "kill -10 "$1
+}
+
 function listening()
 {
     # 只需要一个后台就好了
@@ -59,7 +70,9 @@ function listening()
                 md_dir=`ssh $YOURHOST "cat ~/openTypora"`
                 typora_open $md_dir >/dev/null 2>&1 &
                 disown
-            # 
+            elif [[ x"$i" = xbackup* ]];then
+                get_backup ${i#* } >/dev/null 2>&1 &
+                disown
             elif [ x"$i" = x"check" ];then
                 logcount=$(($logcount + 1))
             elif [ x"$i" = x"exit" ];then

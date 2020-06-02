@@ -10,6 +10,46 @@ port=2333
 
 # 上面两个也可以直接放到bashrc里
 
+function loading()
+{
+    tag=1
+    trap "tag=0" 10
+    while [ $tag = 1 ];
+    do
+        [ $tag = 1 ] && echo -en "\r\\ $*"
+        sleep 0.3
+        [ $tag = 1 ] && echo -en "\r| $*"
+        sleep 0.3
+        [ $tag = 1 ] && echo -en "\r/ $*"
+        sleep 0.3
+    done
+    echo "done                     "
+}
+
+function backup()
+{
+    cd /
+    BACKFILE="backup_`date '+%Y%m%d'`.tar.gz"
+
+    loading "creating backup ..." &
+    pid=$!
+
+    tar -cvpzf $BACKFILE \
+        --exclude=/$BACKFILE \
+        --exclude=/tmp \
+        --exclude=/mnt \
+        --exclude=/dev \
+        --exclude=/sys \
+        --exclude=/run \
+        --exclude=/media \
+        --exclude=/var/log \
+        --exclude=/var/cache/apt/archives \
+        --exclude=/usr/src/linux-headers* \
+        --exclude=/home/*/.cache /
+
+    kill -10 $pid
+}
+
 function send_msg()
 {
     if [ x$1 = x"copy" ];then
@@ -22,6 +62,13 @@ function send_msg()
         [ -f $2 ] || touch $2; 
         echo -n "`pwd`/$2" > ~/openTypora
         echo -n "typora" |nc -w 0 $gateway $port
+    elif [ x$1 = x"backup" ];then
+        backup
+        loading "send to Mac ..." &
+        pid=$!
+        echo -n "backup $pid" |nc -w 0 $gateway $port
+        wait $pid
+
     # # 还没写完
     # elif [ x$1 = x"trans" ];then
     #     [ $# -gt 1 ] || exit -1;
