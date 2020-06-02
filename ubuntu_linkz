@@ -16,14 +16,14 @@ function loading()
     trap "tag=0" 10
     while [ $tag = 1 ];
     do
-        [ $tag = 1 ] && echo -en "\r\\ $1 "`[ $# = 2 ] && du -h $2`"      "
+        [ $tag = 1 ] && echo -en "\r\\ $1 "`[ $# -gt 1 ] && du -h $2`" "`[ $# -gt 2 ] && echo $3`"      "
         sleep 0.3
-        [ $tag = 1 ] && echo -en "\r| $1 "`[ $# = 2 ] && du -h $2`"      "
+        [ $tag = 1 ] && echo -en "\r| $1 "`[ $# -gt 1 ] && du -h $2`" "`[ $# -gt 2 ] && echo $3`"      "
         sleep 0.3
-        [ $tag = 1 ] && echo -en "\r/ $1 "`[ $# = 2 ] && du -h $2`"      "
+        [ $tag = 1 ] && echo -en "\r/ $1 "`[ $# -gt 1 ] && du -h $2`" "`[ $# -gt 2 ] && echo $3`"      "
         sleep 0.3
     done
-    echo -e "\r$* "`[ $# = 2 ] && du -h $2`" done    \n"
+    echo -e "\r$1 "`[ $# -gt 1 ] && du -h $2`" "`[ $# -gt 2 ] && echo $3`" done   \n"
     sleep 0.2
 }
 
@@ -32,7 +32,15 @@ function backup()
     cd /
     BACKFILE="backup_`date '+%Y%m%d'`.tar.gz"
 
-    loading "creating backup ..." "$BACKFILE" &
+    num1=`du -sb --exclude=/usr/src/linux-headers* /usr | sed "s/\([0-9]*\).*/\1/g"`
+    num2=`du -sb --exclude=/home/*/Project/ \
+        --exclude=/home/ubuntu/daily_homework/ \
+        --exclude=/home/ubuntu/homework_31/ \
+        --exclude=/home/ubuntu/share/ \
+        --exclude=/home/*/.cache /home/*/ | sed "s/\([0-9]*\).*/\1/g"`
+
+    total=`numfmt --to=iec $((num1+num2))`
+    loading "creating backup ..." "$BACKFILE" "压缩前大小 $total" &
     pid=$!
 
     sudo tar -cpzf $BACKFILE \
@@ -41,7 +49,7 @@ function backup()
         --exclude=/home/ubuntu/daily_homework/ \
         --exclude=/home/ubuntu/homework_31/ \
         --exclude=/home/ubuntu/share/ \
-        --exclude=/home/*/.cache /usr /home/*/
+        --exclude=/home/*/.cache /usr /home/*/ >/dev/null 2>&1
 
     kill -10 $pid
 }
