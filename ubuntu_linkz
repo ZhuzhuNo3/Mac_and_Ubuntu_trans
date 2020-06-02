@@ -16,14 +16,15 @@ function loading()
     trap "tag=0" 10
     while [ $tag = 1 ];
     do
-        [ $tag = 1 ] && echo -en "\r\\ $*"
+        [ $tag = 1 ] && echo -en "\r\\ $1 "`[ $# = 2 ] && du -h $2`"      "
         sleep 0.3
-        [ $tag = 1 ] && echo -en "\r| $*"
+        [ $tag = 1 ] && echo -en "\r| $1 "`[ $# = 2 ] && du -h $2`"      "
         sleep 0.3
-        [ $tag = 1 ] && echo -en "\r/ $*"
+        [ $tag = 1 ] && echo -en "\r/ $1 "`[ $# = 2 ] && du -h $2`"      "
         sleep 0.3
     done
-    echo "done                     "
+    echo -e "\r$* "`[ $# = 2 ] && du -h $2`" done    \n"
+    sleep 0.2
 }
 
 function backup()
@@ -31,21 +32,16 @@ function backup()
     cd /
     BACKFILE="backup_`date '+%Y%m%d'`.tar.gz"
 
-    loading "creating backup ..." &
+    loading "creating backup ..." "$BACKFILE" &
     pid=$!
 
-    tar -cvpzf $BACKFILE \
-        --exclude=/$BACKFILE \
-        --exclude=/tmp \
-        --exclude=/mnt \
-        --exclude=/dev \
-        --exclude=/sys \
-        --exclude=/run \
-        --exclude=/media \
-        --exclude=/var/log \
-        --exclude=/var/cache/apt/archives \
+    sudo tar -cpzf $BACKFILE \
         --exclude=/usr/src/linux-headers* \
-        --exclude=/home/*/.cache /
+        --exclude=/home/*/Project/ \
+        --exclude=/home/ubuntu/daily_homework/ \
+        --exclude=/home/ubuntu/homework_31/ \
+        --exclude=/home/ubuntu/share/ \
+        --exclude=/home/*/.cache /usr /home/*/
 
     kill -10 $pid
 }
@@ -68,16 +64,6 @@ function send_msg()
         pid=$!
         echo -n "backup $pid" |nc -w 0 $gateway $port
         wait $pid
-
-    # # 还没写完
-    # elif [ x$1 = x"trans" ];then
-    #     [ $# -gt 1 ] || exit -1;
-    #     [ -f $2 ] || exit -1;
-    #     echo -n "`pwd`/$2" > ~/transFile
-    #     echo -n "trans" |nc -w 0 $gateway $port
-    # # 还没写完
-    # elif [ x$1 = x"gets" ];then
-    #     [ $# -gt 1 ] || exit -1;
 
     fi
 }
