@@ -31,25 +31,30 @@ function backup()
 {
     cd /
     BACKFILE="backup_`date '+%Y%m%d'`.tar.gz"
+    sudo touch $BACKFILE
 
-    num1=`du -sb --exclude=/usr/src/linux-headers* /usr | sed "s/\([0-9]*\).*/\1/g"`
-    num2=`du -sb --exclude=/home/*/Project/ \
-        --exclude=/home/ubuntu/daily_homework/ \
-        --exclude=/home/ubuntu/homework_31/ \
-        --exclude=/home/ubuntu/share/ \
-        --exclude=/home/*/.cache /home/*/ | sed "s/\([0-9]*\).*/\1/g"`
+    SAVEFILE="/home/ubuntu/Learn /home/ubuntu/.vim/plugged/prepare-code"
+    # num1=`du -sb --exclude=/usr/src/linux-headers* /usr | sed "s/\([0-9]*\).*/\1/g"`
+    # num2=`du -sb --exclude=/home/*/Project/ \
+    #     --exclude=/home/ubuntu/daily_homework/ \
+    #     --exclude=/home/ubuntu/homework_31/ \
+    #     --exclude=/home/ubuntu/share/ \
+    #     --exclude=/home/*/.cache /home/*/ | sed "s/\([0-9]*\).*/\1/g"`
+    num=`du -sb $SAVEFILE 2>/dev/null | sed "s/\([0-9]*\).*/\1+/g"`
 
-    total=`numfmt --to=iec $((num1+num2))`
+    # total=`numfmt --to=iec $((num1+num2))`
+    total=`numfmt --to=iec $((${num}0))`
     loading "creating backup ..." "$BACKFILE" "压缩前大小 $total" &
     pid=$!
 
-    sudo tar -cpzf $BACKFILE \
-        --exclude=/usr/src/linux-headers* \
-        --exclude=/home/*/Project/ \
-        --exclude=/home/ubuntu/daily_homework/ \
-        --exclude=/home/ubuntu/homework_31/ \
-        --exclude=/home/ubuntu/share/ \
-        --exclude=/home/*/.cache /usr /home/*/ >/dev/null 2>&1
+    # sudo tar -cpzf $BACKFILE \
+    #     --exclude=/usr/src/linux-headers* \
+    #     --exclude=/home/*/Project/ \
+    #     --exclude=/home/ubuntu/daily_homework/ \
+    #     --exclude=/home/ubuntu/homework_31/ \
+    #     --exclude=/home/ubuntu/share/ \
+    #     --exclude=/home/*/.cache /usr /home/*/ >/dev/null 2>&1
+    sudo tar -cpzf $BACKFILE $SAVEFILE >/dev/null 2>&1
 
     kill -10 $pid
 }
@@ -72,7 +77,7 @@ function send_msg()
         pid=$!
         echo -n "backup $pid" |nc -w 0 $gateway $port
         wait $pid
-
+        sudo rm -rf "backup_`date '+%Y%m%d'`.tar.gz"
     fi
 }
 
